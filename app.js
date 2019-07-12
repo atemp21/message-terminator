@@ -5,7 +5,7 @@ const axios = require('axios');
 
 var app = express()
 const port = 3000
-const AuthToken = 'xoxp-694017277831-694313039366-685825510785-e6613d934da6300a1f88bd470284b9e6';
+const AuthToken = process.env.AUTH_TOKEN;
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
