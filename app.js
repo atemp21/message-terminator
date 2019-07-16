@@ -25,6 +25,20 @@ app.get('/privacy', function(req,res){
     res.sendFile('privacy.html',{root:__dirname})
 })
 
+app.get('/auth', function(req,res){
+    var c = req.query.code;
+    var state = req.query.state;
+    if(state === "real"){
+        axios.post('https://slack.com/api/oauth.access',
+        {
+            client_id: '694017277831.691698556484',
+            client_secret: 'd880d0825b2967767debb4ccb57aae2f',
+            code: c,
+            redirect_uri: 'https://message-terminator.herokuapp.com/'
+        })
+    }
+})
+
 app.post('/', async function (req, res) {
     var payload = JSON.parse(req.body.payload);
     var channel = payload.channel.id;
