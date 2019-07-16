@@ -37,6 +37,7 @@ app.get('/auth', function(req,res){
             redirect_uri: 'https://message-terminator.herokuapp.com/'
         })
     }
+    res.sendStatus(200);
 })
 
 app.post('/', async function (req, res) {
