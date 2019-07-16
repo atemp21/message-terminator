@@ -15,9 +15,10 @@ app.use(bodyParser.urlencoded({
 // parse application/json
 app.use(bodyParser.json())
 
+app.use(express.static(__dirname, ''));
 
 app.get('/', function (req, res) {
-    res.send('Message Terminator for Slack')
+    res.sendFile('index.html');
 });
 
 app.post('/', async function (req, res) {
