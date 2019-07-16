@@ -21,6 +21,10 @@ app.get('/', function (req, res) {
     res.sendFile('index.html');
 });
 
+app.get('/privacy', function(req,res){
+    res.sendFile('privacy.html',{root:__dirname})
+})
+
 app.post('/', async function (req, res) {
     var payload = JSON.parse(req.body.payload);
     var channel = payload.channel.id;
