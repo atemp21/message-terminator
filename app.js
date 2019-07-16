@@ -35,9 +35,11 @@ app.get('/auth', function(req,res){
             client_secret: 'd880d0825b2967767debb4ccb57aae2f',
             code: c,
             redirect_uri: 'https://message-terminator.herokuapp.com/'
+        }).then((res)=>{
+            console.log(res)
         })
     }
-    res.sendStatus(200);
+    res.redirect(307, 'https://message-terminator.herokuapp.com');
 })
 
 app.post('/', async function (req, res) {
