@@ -2,7 +2,12 @@ var express = require('express')
 var bodyParser = require('body-parser')
 const axios = require('axios');
 var mysql = require('mysql');
-var connection = mysql.createConnection(process.env.jAWSDB_URL);
+var connection = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_DB
+});
 
 
 var app = express()
