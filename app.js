@@ -49,6 +49,7 @@ app.get('/auth', function (req, res) {
 app.get('/auth/redirect', function (req, res) {
     var code = req.query.code;
     var state = req.query.state;
+    res.sendStatus(200);
     if (state === "real") {
         axios.post('https://slack.com/api/oauth.access', {
                 client_id: process.env.CLIENT_ID,
@@ -57,7 +58,7 @@ app.get('/auth/redirect', function (req, res) {
             })
             .then(res => {
                 console.log(res);
-                connection.connect();
+               // connection.connect();
 
                 // connection.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
                 //     if (err) throw err;
@@ -65,7 +66,7 @@ app.get('/auth/redirect', function (req, res) {
                 //     console.log('The solution is: ', rows[0].solution);
                 // });
 
-                connection.end();
+               // connection.end();
             })
     }
 })
