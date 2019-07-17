@@ -1,11 +1,12 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 const axios = require('axios');
+var mysql = require('mysql');
+var connection = mysql.createConnection(process.env.jAWSDB_URL);
 
 
 var app = express()
 const port = process.env.PORT || 8080
-const AuthToken = process.env.AUTH_TOKEN;
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -17,29 +18,51 @@ app.use(bodyParser.json())
 
 app.use(express.static(__dirname, ''));
 
+//homepage of app
 app.get('/', function (req, res) {
     res.sendFile('index.html');
 });
 
-app.get('/privacy', function(req,res){
-    res.sendFile('privacy.html',{root:__dirname})
+//privacy policy page
+app.get('/privacy', function (req, res) {
+    res.sendFile('privacy.html', {
+        root: __dirname
+    })
 })
 
-app.get('/auth', function(req,res){
-    var c = req.query.code;
+//authorize direct install url for slack
+app.get('/auth', function (req, res) {
+    var state = "real";
+    var scope = "incoming-webhook";
+    var client_id = process.env.CLIENT_ID;
+    var rurl = 'https://message-terminator.herokuapp.com/auth/redirect';
+    var redirect = "https://slack.com/oauth/authorize?client_id=" + client_id + "&scope=" + scope + "&state=" + state + "&redirect_uri=" + rurl;
+    res.redirect(302, redirect);
+})
+
+//authorization redirect 
+app.get('/auth/redirect', function (req, res) {
+    var code = req.query.code;
     var state = req.query.state;
-    if(state === "real"){
-        axios.post('https://slack.com/api/oauth.access',
-        {
-            client_id: '694017277831.691698556484',
-            client_secret: 'd880d0825b2967767debb4ccb57aae2f',
-            code: c,
-            redirect_uri: 'https://message-terminator.herokuapp.com/'
-        }).then((res)=>{
-            console.log(res)
-        })
+    if (state === "real") {
+        axios.post('https://slack.com/api/oauth.access', {
+                client_id: process.env.CLIENT_ID,
+                client_secret: process.env.CLIENT_SECRET,
+                code: code
+            })
+            .then(res => {
+                console.log(res);
+                connection.connect();
+
+                // connection.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
+                //     if (err) throw err;
+
+                //     console.log('The solution is: ', rows[0].solution);
+                // });
+
+                connection.end();
+            })
     }
-    res.redirect(307, 'https://message-terminator.herokuapp.com');
 })
 
 app.post('/', async function (req, res) {
@@ -48,13 +71,12 @@ app.post('/', async function (req, res) {
     var user = payload.user.id;
     var response_url = payload.response_url;
 
- await axios.post(response_url, {
+    await axios.post(response_url, {
         text: "Deleting your messages",
         response_type: 'ephermal'
     })
     await getUsersMessagesInChannel(channel, user, response_url);
     res.sendStatus(200)
-   
 
 });
 
