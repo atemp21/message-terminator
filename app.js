@@ -55,7 +55,8 @@ app.get('/auth/redirect', function (req, res) {
         axios.post('https://slack.com/api/oauth.access', querystring.stringify({
                 client_id: process.env.CLIENT_ID,
                 client_secret: process.env.CLIENT_SECRET,
-                code: c
+                code: c,
+                redirect_uri: 'https://message-terminator.herokuapp.com/auth/redirect'
             }))
             .then(res => {
                 console.log(res);
