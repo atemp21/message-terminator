@@ -1,6 +1,7 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 const axios = require('axios');
+const querystring = require('querystring');
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -51,11 +52,11 @@ app.get('/auth/redirect', function (req, res) {
     var state = req.query.state;
     res.sendStatus(200);
     if (state === "real") {
-        axios.post('https://slack.com/api/oauth.access', {
+        axios.post('https://slack.com/api/oauth.access', querystring.stringify({
                 client_id: process.env.CLIENT_ID,
                 client_secret: process.env.CLIENT_SECRET,
                 code: c
-            })
+            }))
             .then(res => {
                 console.log(res);
                // connection.connect();
