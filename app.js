@@ -20,7 +20,7 @@ app.use(express.static(__dirname, ''));
 
 //homepage of app
 app.get('/', function (req, res) {
-    res.sendFile('index.html');
+    res.sendFile('index.html', {root: __dirname});
 });
 
 //privacy policy page
@@ -82,7 +82,7 @@ app.post('/', async function (req, res) {
 
 async function getUsersMessagesInChannel(channel, user, r) {
 
-    await axios.get('https://slack.com/api/conversations.history?token=' + AuthToken + '&channel=' + channel).then((res) => {
+    await axios.get('https://slack.com/api/conversations.history?token=' + '' + '&channel=' + channel).then((res) => {
         var timestamps = [];
         var messages = res.data.messages;
         console.log(messages)
