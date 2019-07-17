@@ -47,14 +47,14 @@ app.get('/auth', function (req, res) {
 
 //authorization redirect 
 app.get('/auth/redirect', function (req, res) {
-    var code = req.query.code;
+    var c = req.query.code;
     var state = req.query.state;
     res.sendStatus(200);
     if (state === "real") {
         axios.post('https://slack.com/api/oauth.access', {
                 client_id: process.env.CLIENT_ID,
                 client_secret: process.env.CLIENT_SECRET,
-                code: code
+                code: c
             })
             .then(res => {
                 console.log(res);
