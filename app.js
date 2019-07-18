@@ -60,15 +60,15 @@ app.get('/auth/redirect', function (req, res) {
             }))
             .then(res => {
                 console.log(res);
-               // connection.connect();
+                var token = res.body.access_token;
+                var user = res.body.user_id;
+                var team = res.body.team_id;
+               connection.connect();
 
-                // connection.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
-                //     if (err) throw err;
-
-                //     console.log('The solution is: ', rows[0].solution);
-                // });
-
-               // connection.end();
+                connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
+                    if (err) throw err;
+                });
+               connection.end();
             })
     }
 })
@@ -78,19 +78,29 @@ app.post('/', async function (req, res) {
     var channel = payload.channel.id;
     var user = payload.user.id;
     var response_url = payload.response_url;
+    var team = payload.team.id;
 
     await axios.post(response_url, {
         text: "Deleting your messages",
         response_type: 'ephermal'
     })
-    await getUsersMessagesInChannel(channel, user, response_url);
+    await getUsersMessagesInChannel(channel, user, team, response_url);
     res.sendStatus(200)
 
 });
 
-async function getUsersMessagesInChannel(channel, user, r) {
+async function getUsersMessagesInChannel(channel, user, team, r) {
 
-    await axios.get('https://slack.com/api/conversations.history?token=' + '' + '&channel=' + channel).then((res) => {
+    var token;
+
+    connection.connect();
+    connection.query('SELECT token from Tokens where user_id=? or team_id=?',[user, team], function(errors, results, fields){
+        token = results[0].token;
+        console.log(results);
+    }); 
+    connection.end();
+
+    await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel).then((res) => {
         var timestamps = [];
         var messages = res.data.messages;
         console.log(messages)
