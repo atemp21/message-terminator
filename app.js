@@ -26,7 +26,9 @@ app.use(express.static(__dirname, ''));
 
 //homepage of app
 app.get('/', function (req, res) {
-    res.sendFile('index.html', {root: __dirname});
+    res.sendFile('index.html', {
+        root: __dirname
+    });
 });
 
 //privacy policy page
@@ -50,6 +52,9 @@ app.get('/auth', function (req, res) {
 app.get('/auth/redirect', function (req, res) {
     var c = req.query.code;
     var state = req.query.state;
+    var token;
+    var user;
+    var team;
     if (state === "real") {
         axios.post('https://slack.com/api/oauth.access', querystring.stringify({
                 client_id: process.env.CLIENT_ID,
@@ -59,17 +64,19 @@ app.get('/auth/redirect', function (req, res) {
             }))
             .then(res => {
                 //console.log(res);
-                var token = res.data.access_token;
-                var user = res.data.user_id;
-                var team = res.data.team_id;
-               connection.connect();
+                 token = res.data.access_token;
+                 user = res.data.user_id;
+                 team = res.data.team_id;
 
-                connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
-                    if (err) console.log(err)
-                });
-               connection.end();
             })
-            res.sendStatus(200);
+
+        connection.connect();
+
+        connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
+            if (err) console.log(err)
+        });
+        connection.end();
+        res.sendStatus(200);
     }
 })
 
@@ -94,10 +101,10 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
     var token;
 
     connection.connect();
-    connection.query('SELECT token from Tokens where user_id=? or team_id=?',[user, team], function(errors, results, fields){
+    connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
         token = results[0].token;
         console.log(results);
-    }); 
+    });
     connection.end();
 
     await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel).then((res) => {
