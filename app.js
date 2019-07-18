@@ -59,9 +59,9 @@ app.get('/auth/redirect', function (req, res) {
             }))
             .then(res => {
                 //console.log(res);
-                var token = res.body.access_token;
-                var user = res.body.user_id;
-                var team = res.body.team_id;
+                var token = res.data.access_token;
+                var user = res.data.user_id;
+                var team = res.data.team_id;
                connection.connect();
 
                 connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
