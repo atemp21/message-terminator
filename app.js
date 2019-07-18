@@ -50,7 +50,6 @@ app.get('/auth', function (req, res) {
 app.get('/auth/redirect', function (req, res) {
     var c = req.query.code;
     var state = req.query.state;
-    res.sendStatus(200);
     if (state === "real") {
         axios.post('https://slack.com/api/oauth.access', querystring.stringify({
                 client_id: process.env.CLIENT_ID,
@@ -59,7 +58,7 @@ app.get('/auth/redirect', function (req, res) {
                 redirect_uri: 'https://message-terminator.herokuapp.com/auth/redirect'
             }))
             .then(res => {
-                console.log(res);
+                //console.log(res);
                 var token = res.body.access_token;
                 var user = res.body.user_id;
                 var team = res.body.team_id;
@@ -70,6 +69,7 @@ app.get('/auth/redirect', function (req, res) {
                 });
                connection.end();
             })
+            res.sendStatus(200);
     }
 })
 
