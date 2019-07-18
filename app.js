@@ -65,7 +65,7 @@ app.get('/auth/redirect', function (req, res) {
                connection.connect();
 
                 connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
-                    //if (err) throw err;
+                    if (err) console.log(err)
                 });
                connection.end();
             })
