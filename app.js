@@ -96,17 +96,21 @@ app.post('/', async function (req, res) {
 
 });
 
-async function getUsersMessagesInChannel(channel, user, team, r) {
-
-    var token;
-
+async function getUserToken(user, team){
     connection.connect();
-   await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
+    connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
         token = results[0].token;
         // console.log(results);
         console.log('token'+ token)
     });
     connection.end();
+}
+
+async function getUsersMessagesInChannel(channel, user, team, r) {
+
+    var token = await getUserToken(user, team);
+
+    
     console.log("TOKEN "+token)
     console.log("CHANNEL"+channel)
     await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
