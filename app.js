@@ -111,7 +111,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
     console.log("CHANNEL"+channel)
     await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
     .then((res) => {
-        console.log(res)
+        //console.log(res)
         var timestamps = [];
         var messages = res.data.messages;
         console.log(messages)
