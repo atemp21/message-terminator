@@ -119,7 +119,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
                 }
             });
     
-            deleteUserMessages(channel, timestamps, r);
+            deleteUserMessages(channel, timestamps, r, token);
         })
     })
     connection.end();
@@ -129,7 +129,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
 
 }
 
-async function deleteUserMessages(channel, timestamps, url) {
+async function deleteUserMessages(channel, timestamps, url, token) {
 
     await timestamps.forEach(t => {
         axios.post('https://slack.com/api/chat.delete', {
@@ -137,7 +137,7 @@ async function deleteUserMessages(channel, timestamps, url) {
             ts: t
         }, {
             headers: {
-                Authorization: "Bearer " + AuthToken
+                Authorization: "Bearer " + token
             }
         }).then((res) => {
 
