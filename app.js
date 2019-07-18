@@ -96,40 +96,37 @@ app.post('/', async function (req, res) {
 
 });
 
-async function getUserToken(user, team){
+
+async function getUsersMessagesInChannel(channel, user, team, r) {
+
     var token;
+
     connection.connect();
     connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
         token = results[0].token;
         // console.log(results);
         console.log('token'+ token)
-    });
+    }).then(()=>{
+         axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
+        .then((res) => {
+            console.log(res)
+            console.log("TOKEN "+token)
+    
+            var timestamps = [];
+            var messages = res.data.messages;
+            messages.forEach(m => {
+                if (m.user === user) {
+                    timestamps.push(m.ts);
+                }
+            });
+    
+            deleteUserMessages(channel, timestamps, r);
+        })
+    })
     connection.end();
 
-    return token;
-}
-
-async function getUsersMessagesInChannel(channel, user, team, r) {
-
-    var token = await getUserToken(user, team);
-
     
-    await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
-    .then((res) => {
-        console.log(res)
-        console.log("TOKEN "+token)
-
-        var timestamps = [];
-        var messages = res.data.messages;
-        console.log(messages)
-        messages.forEach(m => {
-            if (m.user === user) {
-                timestamps.push(m.ts);
-            }
-        });
-
-        deleteUserMessages(channel, timestamps, r);
-    })
+   
 
 }
 
