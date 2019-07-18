@@ -97,6 +97,7 @@ app.post('/', async function (req, res) {
 });
 
 async function getUserToken(user, team){
+    var token;
     connection.connect();
     connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
         token = results[0].token;
@@ -104,6 +105,8 @@ async function getUserToken(user, team){
         console.log('token'+ token)
     });
     connection.end();
+
+    return token;
 }
 
 async function getUsersMessagesInChannel(channel, user, team, r) {
