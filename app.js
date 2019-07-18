@@ -102,8 +102,9 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
 
     connection.connect();
     connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
-        token = results[0].token;
-        console.log(results);
+        rows = JSON.parse(JSON.stringify(results))
+        token = rows[0].token;
+        console.log(rows);
     });
     connection.end();
 
