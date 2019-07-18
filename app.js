@@ -98,13 +98,13 @@ app.post('/', async function (req, res) {
 
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
-    var token='';
+    var token;
 
     connection.connect();
    await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
         token = results[0].token;
         // console.log(results);
-        // console.log('token'+ token)
+        console.log('token'+ token)
     });
     connection.end();
     console.log("TOKEN "+token)
