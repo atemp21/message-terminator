@@ -90,14 +90,16 @@ app.post('/', async function (req, res) {
     var user = payload.user.id;
     var response_url = payload.response_url;
     var team = payload.team.id;
-
-    await axios.post(response_url, {
-        text: "Deleting your messages",
-        response_type: 'ephermal'
-    })
-    await getUsersMessagesInChannel(channel, user, team, response_url);
-    res.sendStatus(200)
-
+    try {
+        await axios.post(response_url, {
+            text: "Deleting your messages",
+            response_type: 'ephermal'
+        })
+        await getUsersMessagesInChannel(channel, user, team, response_url);
+        res.sendStatus(200)
+    } catch (err) {
+        console.log(err)
+    }
 });
 
 
@@ -109,7 +111,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
         await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
             token = results[0].token;
 
-             axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
+            axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
                 .then((res) => {
                     var timestamps = [];
                     var messages = res.data.messages;
@@ -119,7 +121,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
                         }
                     });
 
-                     deleteUserMessages(channel, timestamps, r, token);
+                    deleteUserMessages(channel, timestamps, r, token);
                 })
         })
         connection.end();
