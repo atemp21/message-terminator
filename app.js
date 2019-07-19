@@ -55,31 +55,35 @@ app.get('/auth/redirect', function (req, res) {
     var token;
     var user;
     var team;
-    if (state === "real") {
-        axios.post('https://slack.com/api/oauth.access', querystring.stringify({
-                client_id: process.env.CLIENT_ID,
-                client_secret: process.env.CLIENT_SECRET,
-                code: c,
-                redirect_uri: 'https://message-terminator.herokuapp.com/auth/redirect'
-            }))
-            .then(res => {
-                //console.log(res);
-                 token = res.data.access_token;
-                 user = res.data.user_id;
-                 team = res.data.team_id;
+    try {
+        if (state === "real") {
+            axios.post('https://slack.com/api/oauth.access', querystring.stringify({
+                    client_id: process.env.CLIENT_ID,
+                    client_secret: process.env.CLIENT_SECRET,
+                    code: c,
+                    redirect_uri: 'https://message-terminator.herokuapp.com/auth/redirect'
+                }))
+                .then(res => {
+                    token = res.data.access_token;
+                    user = res.data.user_id;
+                    team = res.data.team_id;
 
-            })
+                })
 
-        connection.connect();
+            connection.connect();
 
-        connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
-            if (err) console.log(err)
-        });
-        connection.end();
-        res.sendStatus(200);
+            connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
+                if (err) console.log(err)
+            });
+            connection.end();
+            res.sendStatus(200);
+        }
+    } catch (err) {
+        console.log(err);
     }
 })
 
+//action button pressed post
 app.post('/', async function (req, res) {
     var payload = JSON.parse(req.body.payload);
     var channel = payload.channel.id;
@@ -100,49 +104,48 @@ app.post('/', async function (req, res) {
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
     var token;
+    try {
+        connection.connect();
+        await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
+            token = results[0].token;
 
-    connection.connect();
-    connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
-        token = results[0].token;
-        // console.log(results);
-        console.log('token'+ token)
-         axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
-        .then((res) => {
-            console.log(res)
-            console.log("TOKEN "+token)
-    
-            var timestamps = [];
-            var messages = res.data.messages;
-            messages.forEach(m => {
-                if (m.user === user) {
-                    timestamps.push(m.ts);
-                }
-            });
-    
-            deleteUserMessages(channel, timestamps, r, token);
+            await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
+                .then((res) => {
+                    var timestamps = [];
+                    var messages = res.data.messages;
+                    messages.forEach(m => {
+                        if (m.user === user) {
+                            timestamps.push(m.ts);
+                        }
+                    });
+
+                    await deleteUserMessages(channel, timestamps, r, token);
+                })
         })
-    })
-    connection.end();
+        connection.end();
+    } catch (err) {
+        console.log(err)
+    }
 
-    
-   
+
 
 }
 
 async function deleteUserMessages(channel, timestamps, url, token) {
-
-    await timestamps.forEach(t => {
-        axios.post('https://slack.com/api/chat.delete', {
-            channel: channel,
-            ts: t
-        }, {
-            headers: {
-                Authorization: "Bearer " + token
-            }
-        }).then((res) => {
-
+    try {
+        await timestamps.forEach(t => {
+            axios.post('https://slack.com/api/chat.delete', {
+                channel: channel,
+                ts: t
+            }, {
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            })
         });
-    });
+    } catch (err) {
+        console.log(err)
+    }
 
 }
 
