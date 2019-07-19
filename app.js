@@ -119,7 +119,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
                         }
                     });
 
-                    await deleteUserMessages(channel, timestamps, r, token);
+                     deleteUserMessages(channel, timestamps, r, token);
                 })
         })
         connection.end();
