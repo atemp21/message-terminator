@@ -10,9 +10,11 @@ var connection = mysql.createConnection({
     database: process.env.DB_DB
 });
 
+//var connection = mysql.createConnection('mysql://wz6ox4j1cv97xzq4:h3ntg3h9hrgc3kne@etdq12exrvdjisg6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/yymaofrai0o0vwvx');
 
 var app = express()
 const port = process.env.PORT || 8080
+//const path = 'https://ecdd4492.ngrok.io';
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -70,12 +72,9 @@ app.get('/auth/redirect', function (req, res) {
 
                 })
 
-            connection.connect();
-
             connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
                 if (err) console.log(err)
             });
-            connection.end();
             res.sendStatus(200);
         }
     } catch (err) {
@@ -105,31 +104,29 @@ app.post('/', async function (req, res) {
 
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
-    var token;
-    try {
-        connection.connect();
-        await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
-            token = results[0].token;
+    var token = await getUserToken(user, team);
+    var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
 
-            axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
-                .then((res) => {
-                    var timestamps = [];
-                    var messages = res.data.messages;
-                    messages.forEach(m => {
-                        if (m.user === user) {
-                            timestamps.push(m.ts);
-                        }
-                    });
+    var timestamps = [];
+    var messages = await res.data.messages;
+    messages.forEach(m => {
+        if (m.user === user) {
+            timestamps.push(m.ts);
+        }
+    })
 
-                    deleteUserMessages(channel, timestamps, r, token);
-                })
-        })
-        connection.end();
-    } catch (err) {
-        console.log(err)
-    }
+    deleteUserMessages(channel, timestamps, r, token);
 
 
+}
+
+async function getUserToken(user, team) {
+    return new Promise(function(resolve, reject){
+        connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function(error, results, fields){
+            if(error) return reject(error)
+            resolve(results[0].token)
+        });
+    })
 
 }
 
