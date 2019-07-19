@@ -109,7 +109,7 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
         await connection.query('SELECT token from Tokens where user_id=? or team_id=?', [user, team], function (errors, results, fields) {
             token = results[0].token;
 
-            await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
+             axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel)
                 .then((res) => {
                     var timestamps = [];
                     var messages = res.data.messages;
