@@ -13,7 +13,7 @@ var connection = mysql.createConnection({
 
 var app = express()
 const port = process.env.PORT || 8080
-const path = 'https://message-terminator.herokuapp.com/';
+const path = 'https://message-terminator.herokuapp.com';
 const clientid = process.env.CLIENT_ID;
 const clientsecret = process.env.CLIENT_SECRET;
 
