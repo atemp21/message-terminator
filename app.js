@@ -9,12 +9,13 @@ var connection = mysql.createConnection({
     password: process.env.DB_PASS,
     database: process.env.DB_DB
 });
-
-//var connection = mysql.createConnection('mysql://wz6ox4j1cv97xzq4:h3ntg3h9hrgc3kne@etdq12exrvdjisg6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/yymaofrai0o0vwvx');
+ //connection = mysql.createConnection('mysql://wz6ox4j1cv97xzq4:h3ntg3h9hrgc3kne@etdq12exrvdjisg6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/yymaofrai0o0vwvx');
 
 var app = express()
 const port = process.env.PORT || 8080
-//const path = 'https://ecdd4492.ngrok.io';
+const path = 'https://message-terminator.herokuapp.com/';
+const clientid = process.env.CLIENT_ID;
+const clientsecret = process.env.CLIENT_SECRET;
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -36,7 +37,13 @@ app.get('/', function (req, res) {
 //privacy policy page
 app.get('/privacy', function (req, res) {
     res.sendFile('privacy.html', {
-        root: __dirname
+        root: __dirname,
+    })
+})
+
+app.get('/install', function(req,res){
+    res.sendFile('install.html', {
+        root:__dirname
     })
 })
 
@@ -44,14 +51,14 @@ app.get('/privacy', function (req, res) {
 app.get('/auth', function (req, res) {
     var state = "real";
     var scope = "incoming-webhook";
-    var client_id = process.env.CLIENT_ID;
-    var rurl = 'https://message-terminator.herokuapp.com/auth/redirect';
+    var client_id = clientid;
+    var rurl = path+'/auth/redirect';
     var redirect = "https://slack.com/oauth/authorize?client_id=" + client_id + "&scope=" + scope + "&state=" + state + "&redirect_uri=" + rurl;
     res.redirect(302, redirect);
 })
 
 //authorization redirect 
-app.get('/auth/redirect', function (req, res) {
+app.get('/auth/redirect', async function (req, res) {
     var c = req.query.code;
     var state = req.query.state;
     var token;
@@ -59,11 +66,11 @@ app.get('/auth/redirect', function (req, res) {
     var team;
     try {
         if (state === "real") {
-            axios.post('https://slack.com/api/oauth.access', querystring.stringify({
-                    client_id: process.env.CLIENT_ID,
-                    client_secret: process.env.CLIENT_SECRET,
+            await axios.post('https://slack.com/api/oauth.access', querystring.stringify({
+                    client_id: clientid,
+                    client_secret: clientsecret,
                     code: c,
-                    redirect_uri: 'https://message-terminator.herokuapp.com/auth/redirect'
+                    redirect_uri: path+'/auth/redirect'
                 }))
                 .then(res => {
                     token = res.data.access_token;
@@ -75,10 +82,11 @@ app.get('/auth/redirect', function (req, res) {
             connection.query('INSERT INTO Tokens(token, user_id, team_id) values(?,?,?)', [token, user, team], function (err, rows, fields) {
                 if (err) console.log(err)
             });
-            res.sendStatus(200);
+            res.redirect(302, path+'/install');
         }
     } catch (err) {
         console.log(err);
+        res.status(500).send("Unable to authorize your Slack. Try again or contact support for help");
     }
 })
 
