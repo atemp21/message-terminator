@@ -50,7 +50,7 @@ app.get('/install', function(req,res){
 //authorize direct install url for slack
 app.get('/auth', function (req, res) {
     var state = "real";
-    var scope = "incoming-webhook,commands";
+    var scope = "commands";
     var client_id = clientid;
     var rurl = path+'/auth/redirect';
     var redirect = "https://slack.com/oauth/authorize?client_id=" + client_id + "&scope=" + scope + "&state=" + state + "&redirect_uri=" + rurl;
