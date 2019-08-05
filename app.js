@@ -133,7 +133,7 @@ async function getUserToken(user, team, rurl) {
             resolve(results[0].token)
             }
             else{
-                await axios.post(response_url, {
+                     axios.post(rurl, {
                     text: "Not Authorized. To authorize visit: "+path,
                     response_type: 'ephermal'
                 })
