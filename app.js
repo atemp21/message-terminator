@@ -48,16 +48,6 @@ app.get('/install', function(req,res){
     })
 })
 
-//authorize direct install url for slack
-app.get('/auth', function (req, res) {
-    var state = "real";
-    var scope = "commands";
-    var client_id = clientid;
-    var rurl = path+'/auth/redirect';
-    var redirect = "https://slack.com/oauth/authorize?client_id=" + client_id + "&scope=" + scope + "&state=" + state + "&redirect_uri=" + rurl;
-    res.redirect(302, redirect);
-})
-
 //authorization redirect 
 app.get('/auth/redirect', async function (req, res) {
     var c = req.query.code;
@@ -138,6 +128,7 @@ async function getUserToken(user, team) {
             resolve(results[0].token)
             }
             else{
+            res.sendStatus(403);
              open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
             }
             
