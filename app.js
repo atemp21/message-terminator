@@ -3,6 +3,7 @@ var bodyParser = require('body-parser')
 const axios = require('axios');
 const querystring = require('querystring');
 var mysql = require('mysql');
+const open = require('open');
 var connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -14,8 +15,8 @@ var connection = mysql.createConnection({
 var app = express()
 const port = process.env.PORT || 8080
 const path = 'https://message-terminator.herokuapp.com';
-const clientid = process.env.CLIENT_ID;
-const clientsecret = process.env.CLIENT_SECRET;
+const clientid = process.env.CLIENT_ID || '694017277831.691698556484';
+const clientsecret = process.env.CLIENT_SECRET || 'd880d0825b2967767debb4ccb57aae2f';
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -113,9 +114,7 @@ app.post('/', async function (req, res) {
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
     var token = await getUserToken(user, team);
-    if(token == null){ 
-        window.open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write');
-    }
+    
     var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
     
     var timestamps = [];
@@ -135,7 +134,13 @@ async function getUserToken(user, team) {
     return new Promise(function(resolve, reject){
         connection.query('SELECT token from Tokens where user_id=?', [user], function(error, results, fields){
             if(error) return reject(error)
+            if(results.length > 0){
             resolve(results[0].token)
+            }
+            else{
+             open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
+            }
+            
         });
     })
 
