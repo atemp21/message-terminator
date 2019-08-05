@@ -104,7 +104,7 @@ app.post('/', async function (req, res) {
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
     try{
-    var token = await getUserToken(user, team);
+    var token = await getUserToken(user, team,r);
     
     var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
     
@@ -125,7 +125,7 @@ catch (err){
 
 }
 
-async function getUserToken(user, team) {
+async function getUserToken(user, team, rurl) {
     return new Promise(function(resolve, reject){
         connection.query('SELECT token from Tokens where user_id=?', [user], function(error, results, fields){
             if(error) return reject(error)
@@ -133,7 +133,10 @@ async function getUserToken(user, team) {
             resolve(results[0].token)
             }
             else{
-             open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
+                await axios.post(response_url, {
+                    text: "Not Authorized. To authorize visit: "+path,
+                    response_type: 'ephermal'
+                })
             }
             
         });
