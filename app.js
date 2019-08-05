@@ -103,6 +103,7 @@ app.post('/', async function (req, res) {
 
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
+    try{
     var token = await getUserToken(user, team);
     
     var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
@@ -116,6 +117,10 @@ async function getUsersMessagesInChannel(channel, user, team, r) {
     })
 
     deleteUserMessages(channel, timestamps, r, token);
+}
+catch (err){
+    console.log(err)
+}
 
 
 }
@@ -128,8 +133,7 @@ async function getUserToken(user, team) {
             resolve(results[0].token)
             }
             else{
-            res.sendStatus(403);
-            return open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
+             open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
             }
             
         });
