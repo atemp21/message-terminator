@@ -113,12 +113,11 @@ app.post('/', async function (req, res) {
 async function getUsersMessagesInChannel(channel, user, team, r) {
 
     var token = await getUserToken(user, team);
-    var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
-
     if(token == null){ 
-        res.redirect(302, 'https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write');
+        window.open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write');
     }
-
+    var res = await axios.get('https://slack.com/api/conversations.history?token=' + token + '&channel=' + channel);
+    
     var timestamps = [];
     var messages = await res.data.messages;
     messages.forEach(m => {
