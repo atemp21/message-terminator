@@ -129,7 +129,7 @@ async function getUserToken(user, team) {
             }
             else{
             res.sendStatus(403);
-             open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
+            return open('https://slack.com/oauth/authorize?client_id=694017277831.691698556484&scope=channels:history,commands,im:history,chat:write:user,chat:write:bot,channels:read,groups:history,groups:read,im:read,channels:write,groups:write,im:write,mpim:history,mpim:read,mpim:write&state=real')
             }
             
         });
