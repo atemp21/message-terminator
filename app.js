@@ -28,6 +28,11 @@ app.use(bodyParser.json())
 
 app.use(express.static(__dirname, ''));
 
+//ping app to keep awake
+setInterval(function(){
+    app.get("http://message-terminator.herokuapp.com/");
+}, 300000);
+
 //homepage of app
 app.get('/', function (req, res) {
     res.sendFile('index.html', {
